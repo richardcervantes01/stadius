@@ -37,6 +37,21 @@ export type SubNavOption =
   | 'CATALOGO_SKUS'
   | 'MAPA_LAYOUT'
   | 'STOCK_ON_HAND'
+  | 'GESTION_RECEPCION'
+  | 'GESTION_UBICACIONES'
+  | 'INVENTARIOS_FISICOS'
+  | 'GESTION_PICKING'
+  | 'GESTION_EMPAQUE'
+  | 'GESTION_EXPEDICION'
+  | 'GESTION_PATIOS'
+  // Operaciones de Transporte
+  | 'GESTION_ORDENES_ENVIO'
+  | 'PLANIFICACION_RUTAS'
+  | 'SELECCION_PROVEEDORES'
+  | 'GESTION_CARGAS'
+  | 'SEGUIMIENTO_TRAZABILIDAD'
+  | 'AUDITORIA_FLETES'
+  | 'GESTION_PATIOS_BASCULA'
   // Sistemas y Seguridad
   | 'GESTION_USUARIOS'
   | 'CAMBIO_CLAVE'
@@ -246,29 +261,43 @@ export type AbcClassification = 'A' | 'B' | 'C';
 export type UnitOfMeasure = 'PALLET' | 'CAJA' | 'UNIDAD' | 'BIDON';
 export type StorageEnvironment = 'AMBIENTE' | 'REFRIGERADO' | 'CONGELADO' | 'PELIGROSO';
 
+export type ControlType = 'SERIE' | 'LOTE' | 'GENERAL';
+
 export interface SkuMasterItem {
   id: string;
   tenantId: string;
   sku: string;
+  additionalCodes: string[];
   barcode: string;
+  barcodeType?: 'EAN-13' | 'Code128' | 'GS1-128' | 'QR';
   description: string;
   clientName: string;
-  category: string;
   family: string;
-  dimensionsCm: {
+  dimensionsMeters: {
     length: number;
     width: number;
     height: number;
   };
   weightKg: number;
   volumeM3: number;
-  abcClass: AbcClassification;
   unitOfMeasure: UnitOfMeasure;
-  storageEnvironment: StorageEnvironment;
   unitCost: number;
-  minStock: number;
-  maxStock: number;
+  currency: 'PEN' | 'USD';
+  controlType: ControlType;
+  storageEnvironment: StorageEnvironment;
   active: boolean;
+  
+  // Auditing
+  createdBy: string;
+  createdAt: string;
+  updatedBy: string;
+  updatedAt: string;
+  
+  // Integration
+  externalId?: string;
+  sourceSystem?: string;
+  syncStatus?: 'SYNCED' | 'PENDING' | 'ERROR';
+  lastSyncedAt?: string;
 }
 
 export type LocationOccupancyStatus = 'VACIO' | 'PARCIAL' | 'LLENO' | 'BLOQUEADO';

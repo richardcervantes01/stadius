@@ -481,49 +481,61 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 {/* Sub-options for Admin, Supervisor, and Comercial */}
                 {role !== 'OPERATOR' && (
                   <>
-                    {canAccessSub('CATALOGO_SKUS') && (
+                    {/* Warehouse Operations */}
+                    <div className="pt-2 pb-1 text-[10px] font-bold text-slate-500 uppercase tracking-wider pl-2">Almacén (Inbound/Outbound)</div>
+                    {[
+                      { id: 'GESTION_RECEPCION', label: 'Gestión de Recepción' },
+                      { id: 'GESTION_UBICACIONES', label: 'Ubicaciones y Almacén' },
+                      { id: 'INVENTARIOS_FISICOS', label: 'Inventario Físico' },
+                      { id: 'GESTION_PICKING', label: 'Órdenes y Picking' },
+                      { id: 'GESTION_EMPAQUE', label: 'Empaque y Embalaje' },
+                      { id: 'GESTION_EXPEDICION', label: 'Expedición y Despacho' },
+                      { id: 'GESTION_PATIOS', label: 'Patios y Puertas' },
+                      { id: 'CATALOGO_SKUS', label: 'Catálogo de SKUs' },
+                      { id: 'MAPA_LAYOUT', label: 'Mapa de Ubicaciones' },
+                      { id: 'STOCK_ON_HAND', label: 'Consulta de Stock' },
+                    ].map(sub => (
                       <button
-                        onClick={() => onNavigate('OPERACIONES', 'CATALOGO_SKUS')}
-                        className={`w-full text-left py-1.5 px-2.5 rounded-lg text-[11px] transition-colors flex items-center gap-2 ${
-                          activeModule === 'OPERACIONES' && activeSubOption === 'CATALOGO_SKUS'
+                        key={sub.id}
+                        onClick={() => onNavigate('OPERACIONES', sub.id as SubNavOption)}
+                        className={`w-full text-left py-1 px-2.5 rounded-lg text-[11px] transition-colors flex items-center gap-2 ${
+                          activeModule === 'OPERACIONES' && activeSubOption === sub.id
                             ? 'bg-emerald-500 text-slate-950 font-bold shadow-xs'
                             : 'text-slate-300 hover:text-white hover:bg-slate-800'
                         }`}
                       >
                         <Layers className="w-3 h-3 shrink-0" />
-                        <span className="truncate">Catálogo de SKUs / Maestro</span>
+                        <span className="truncate">{sub.label}</span>
                       </button>
-                    )}
+                    ))}
 
-                    {canAccessSub('MAPA_LAYOUT') && (
+                    {/* Transport Operations */}
+                    <div className="pt-2 pb-1 text-[10px] font-bold text-slate-500 uppercase tracking-wider pl-2">Transporte</div>
+                    {[
+                      { id: 'GESTION_ORDENES_ENVIO', label: 'Gestión de Envíos' },
+                      { id: 'PLANIFICACION_RUTAS', label: 'Planificación de Rutas' },
+                      { id: 'SELECCION_PROVEEDORES', label: 'Proveedores / Fletes' },
+                      { id: 'GESTION_CARGAS', label: 'Cargas y Consolidación' },
+                      { id: 'SEGUIMIENTO_TRAZABILIDAD', label: 'Seguimiento (Tracking)' },
+                      { id: 'AUDITORIA_FLETES', label: 'Auditoría de Fletes' },
+                      { id: 'GESTION_PATIOS_BASCULA', label: 'Patios y Báscula' },
+                    ].map(sub => (
                       <button
-                        onClick={() => onNavigate('OPERACIONES', 'MAPA_LAYOUT')}
-                        className={`w-full text-left py-1.5 px-2.5 rounded-lg text-[11px] transition-colors flex items-center gap-2 ${
-                          activeModule === 'OPERACIONES' && activeSubOption === 'MAPA_LAYOUT'
-                            ? 'bg-emerald-500 text-slate-950 font-bold shadow-xs'
+                        key={sub.id}
+                        onClick={() => onNavigate('OPERACIONES', sub.id as SubNavOption)}
+                        className={`w-full text-left py-1 px-2.5 rounded-lg text-[11px] transition-colors flex items-center gap-2 ${
+                          activeModule === 'OPERACIONES' && activeSubOption === sub.id
+                            ? 'bg-sky-500 text-slate-950 font-bold shadow-xs'
                             : 'text-slate-300 hover:text-white hover:bg-slate-800'
                         }`}
                       >
-                        <MapPin className="w-3 h-3 shrink-0" />
-                        <span className="truncate">Mapa de Ubicaciones (Layout)</span>
+                        <Warehouse className="w-3 h-3 shrink-0" />
+                        <span className="truncate">{sub.label}</span>
                       </button>
-                    )}
-
-                    {canAccessSub('STOCK_ON_HAND') && (
-                      <button
-                        onClick={() => onNavigate('OPERACIONES', 'STOCK_ON_HAND')}
-                        className={`w-full text-left py-1.5 px-2.5 rounded-lg text-[11px] transition-colors flex items-center gap-2 ${
-                          activeModule === 'OPERACIONES' && activeSubOption === 'STOCK_ON_HAND'
-                            ? 'bg-emerald-500 text-slate-950 font-bold shadow-xs'
-                            : 'text-slate-300 hover:text-white hover:bg-slate-800'
-                        }`}
-                      >
-                        <PackageSearch className="w-3 h-3 shrink-0" />
-                        <span className="truncate">Consulta de Stock (On-Hand)</span>
-                      </button>
-                    )}
+                    ))}
                   </>
                 )}
+
               </div>
             )}
           </div>

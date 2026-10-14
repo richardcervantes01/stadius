@@ -73,6 +73,7 @@ import { QuotationsModule } from './components/commercial/QuotationsModule';
 import { ServicesInquiryModule } from './components/commercial/ServicesInquiryModule';
 import { SettlementsModule } from './components/commercial/SettlementsModule';
 import { SkuCatalogModule } from './components/operations/SkuCatalogModule';
+import { GenericOperationsModule } from './components/operations/GenericOperationsModule';
 import { WarehouseLayoutMap } from './components/operations/WarehouseLayoutMap';
 import { StockOnHandModule } from './components/operations/StockOnHandModule';
 import { TenantSettingsModule } from './components/systems/TenantSettingsModule';
@@ -809,7 +810,7 @@ export default function App() {
             </button>
 
             {/* SOS Live Alert Bell */}
-            {(activeModule === 'OPERACIONES' && (activeSubOption === 'INVENTARIOS_CORE' || activeSubOption === 'INVENTARIOS_CICLICOS')) && (
+            {((activeModule === 'OPERACIONES' || activeModule === 'INVENTARIOS') && (activeSubOption === 'INVENTARIOS_CORE' || activeSubOption === 'INVENTARIOS_CICLICOS')) && (
               <button
                 onClick={() => setShowSosDrawer(true)}
                 className={`relative flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-lg border transition-all ${
@@ -1120,6 +1121,12 @@ export default function App() {
                 )}
 
                 {/* 2. Catálogo de SKUs */}
+                {['GESTION_RECEPCION', 'GESTION_UBICACIONES', 'INVENTARIOS_FISICOS', 'GESTION_PICKING', 'GESTION_EMPAQUE', 'GESTION_EXPEDICION', 'GESTION_PATIOS', 'GESTION_ORDENES_ENVIO', 'PLANIFICACION_RUTAS', 'SELECCION_PROVEEDORES', 'GESTION_CARGAS', 'SEGUIMIENTO_TRAZABILIDAD', 'AUDITORIA_FLETES', 'GESTION_PATIOS_BASCULA'].includes(activeSubOption) && (
+                  <GenericOperationsModule 
+                    title={activeSubOption.replace(/_/g, ' ')}
+                    description="Funcionalidad en desarrollo para la optimización de procesos operativos."
+                  />
+                )}
                 {activeSubOption === 'CATALOGO_SKUS' && (
                   <SkuCatalogModule
                     skuCatalog={skuCatalog}

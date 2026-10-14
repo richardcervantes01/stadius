@@ -1,0 +1,37 @@
+{
+  "entities": {
+    "Sku": {
+      "title": "Sku",
+      "description": "Master SKU record",
+      "type": "object",
+      "properties": {
+        "sku": { "type": "string" },
+        "description": { "type": "string" },
+        "barcode": { "type": "string" }
+      },
+      "required": ["sku", "description"]
+    },
+    "Movement": {
+      "title": "Movement",
+      "description": "Kardex movement record",
+      "type": "object",
+      "properties": {
+        "sku": { "type": "string" },
+        "type": { "type": "string" },
+        "quantity": { "type": "number" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["sku", "type", "quantity", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/skus/{skuId}": {
+      "schema": { "$ref": "Sku" },
+      "description": "SKU catalog"
+    },
+    "/movements/{movementId}": {
+      "schema": { "$ref": "Movement" },
+      "description": "Inventory movements"
+    }
+  }
+}

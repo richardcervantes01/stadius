@@ -15,7 +15,7 @@ import {
   CheckCircle2,
   Building
 } from 'lucide-react';
-import { SkuMasterItem, AbcClassification, UnitOfMeasure, StorageEnvironment, ClientAccount, User } from '../../types/inventory';
+import { SkuMasterItem, ControlType, UnitOfMeasure, StorageEnvironment, ClientAccount, User } from '../../types/inventory';
 
 interface SkuCatalogModuleProps {
   skuCatalog: SkuMasterItem[];
@@ -26,8 +26,8 @@ interface SkuCatalogModuleProps {
 }
 
 export const SkuCatalogModule: React.FC<SkuCatalogModuleProps> = ({
-  skuCatalog,
-  clients,
+  skuCatalog = [],
+  clients = [],
   currentUser,
   onSaveSku,
   onDeleteSku,
@@ -46,16 +46,16 @@ export const SkuCatalogModule: React.FC<SkuCatalogModuleProps> = ({
   const [formClientName, setFormClientName] = useState(clients[0]?.name || 'Retail Pro S.A.');
   const [formCategory, setFormCategory] = useState('General');
   const [formFamily, setFormFamily] = useState('Estándar');
-  const [formLengthCm, setFormLengthCm] = useState(30);
-  const [formWidthCm, setFormWidthCm] = useState(20);
-  const [formHeightCm, setFormHeightCm] = useState(15);
-  const [formWeightKg, setFormWeightKg] = useState(5);
-  const [formAbcClass, setFormAbcClass] = useState<AbcClassification>('B');
+  const [formLengthM, setFormLengthM] = useState(0.30);
+  const [formWidthM, setFormWidthM] = useState(0.20);
+  const [formHeightM, setFormHeightM] = useState(0.15);
+  const [formWeightKg, setFormWeightKg] = useState(5.0);
+  const [formControlType, setFormControlType] = useState<ControlType>('GENERAL');
   const [formUnitOfMeasure, setFormUnitOfMeasure] = useState<UnitOfMeasure>('CAJA');
   const [formStorageEnv, setFormStorageEnv] = useState<StorageEnvironment>('AMBIENTE');
-  const [formUnitCost, setFormUnitCost] = useState(50);
-  const [formMinStock, setFormMinStock] = useState(10);
-  const [formMaxStock, setFormMaxStock] = useState(500);
+  const [formUnitCost, setFormUnitCost] = useState(50.0);
+  const [formCurrency, setFormCurrency] = useState<'PEN' | 'USD'>('USD');
+  const [formActive, setFormActive] = useState(true);
 
   const openCreateModal = () => {
     setEditingSku(null);
@@ -65,16 +65,16 @@ export const SkuCatalogModule: React.FC<SkuCatalogModuleProps> = ({
     setFormClientName(clients[0]?.name || 'Retail Pro S.A.');
     setFormCategory('General');
     setFormFamily('Estándar');
-    setFormLengthCm(30);
-    setFormWidthCm(20);
-    setFormHeightCm(15);
-    setFormWeightKg(5);
-    setFormAbcClass('B');
+    setFormLengthM(0.30);
+    setFormWidthM(0.20);
+    setFormHeightM(0.15);
+    setFormWeightKg(5.0);
+    setFormControlType('GENERAL');
     setFormUnitOfMeasure('CAJA');
     setFormStorageEnv('AMBIENTE');
-    setFormUnitCost(50);
-    setFormMinStock(10);
-    setFormMaxStock(500);
+    setFormUnitCost(50.0);
+    setFormCurrency('USD');
+    setFormActive(true);
     setShowModal(true);
   };
 
@@ -86,16 +86,13 @@ export const SkuCatalogModule: React.FC<SkuCatalogModuleProps> = ({
     setFormClientName(item.clientName);
     setFormCategory(item.category);
     setFormFamily(item.family);
-    setFormLengthCm(item.dimensionsCm.length);
-    setFormWidthCm(item.dimensionsCm.width);
-    setFormHeightCm(item.dimensionsCm.height);
+    setFormLengthM(item.dimensionsMeters?.length ?? 0);
+    setFormWidthM(item.dimensionsMeters?.width ?? 0);
+    setFormHeightM(item.dimensionsMeters?.height ?? 0);
     setFormWeightKg(item.weightKg);
-    setFormAbcClass(item.abcClass);
     setFormUnitOfMeasure(item.unitOfMeasure);
     setFormStorageEnv(item.storageEnvironment);
     setFormUnitCost(item.unitCost);
-    setFormMinStock(item.minStock);
-    setFormMaxStock(item.maxStock);
     setShowModal(true);
   };
 
@@ -106,31 +103,34 @@ export const SkuCatalogModule: React.FC<SkuCatalogModuleProps> = ({
       return;
     }
 
-    const volumeM3 = Number(((formLengthCm * formWidthCm * formHeightCm) / 1000000).toFixed(4));
+    const volumeM3 = Number((formLengthM * formWidthM * formHeightM).toFixed(4));
 
     const itemToSave: SkuMasterItem = {
       id: editingSku ? editingSku.id : `SKU-${Date.now()}`,
       tenantId: 'TNT-STADIUS-01',
       sku: formSku.trim(),
+      additionalCodes: [],
       barcode: formBarcode.trim() || 'SIN-CODIGO',
       description: formDescription.trim(),
       clientName: formClientName,
-      category: formCategory,
       family: formFamily,
-      dimensionsCm: {
-        length: formLengthCm,
-        width: formWidthCm,
-        height: formHeightCm,
+      dimensionsMeters: {
+        length: formLengthM,
+        width: formWidthM,
+        height: formHeightM,
       },
       weightKg: formWeightKg,
       volumeM3,
-      abcClass: formAbcClass,
       unitOfMeasure: formUnitOfMeasure,
-      storageEnvironment: formStorageEnv,
       unitCost: formUnitCost,
-      minStock: formMinStock,
-      maxStock: formMaxStock,
-      active: true,
+      currency: formCurrency,
+      controlType: formControlType,
+      storageEnvironment: formStorageEnv,
+      active: formActive,
+      createdBy: currentUser.name,
+      createdAt: editingSku ? editingSku.createdAt : new Date().toISOString(),
+      updatedBy: currentUser.name,
+      updatedAt: new Date().toISOString(),
     };
 
     onSaveSku(itemToSave);
@@ -138,7 +138,7 @@ export const SkuCatalogModule: React.FC<SkuCatalogModuleProps> = ({
   };
 
   // Filter SKUs
-  const filteredSkus = skuCatalog.filter(item => {
+  const filteredSkus = (skuCatalog || []).filter(item => {
     const matchesSearch = 
       item.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -149,7 +149,7 @@ export const SkuCatalogModule: React.FC<SkuCatalogModuleProps> = ({
     return matchesSearch && matchesCategory && matchesAbc && matchesClient;
   });
 
-  const categories = Array.from(new Set(skuCatalog.map(s => s.category)));
+  const categories = Array.from(new Set((skuCatalog || []).map(s => s.category)));
 
   return (
     <div className="space-y-6 animate-in fade-in duration-200">
@@ -202,7 +202,7 @@ export const SkuCatalogModule: React.FC<SkuCatalogModuleProps> = ({
               className="text-xs bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-2 font-medium focus:outline-none"
             >
               <option value="ALL">Todas las Categorías</option>
-              {categories.map(c => (
+              {(categories || []).map(c => (
                 <option key={c} value={c}>{c}</option>
               ))}
             </select>
@@ -224,7 +224,7 @@ export const SkuCatalogModule: React.FC<SkuCatalogModuleProps> = ({
               className="text-xs bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-2 font-medium focus:outline-none"
             >
               <option value="ALL">Todos los Clientes</option>
-              {clients.map(c => (
+              {(clients || []).map(c => (
                 <option key={c.id} value={c.name}>{c.name}</option>
               ))}
             </select>
@@ -245,9 +245,9 @@ export const SkuCatalogModule: React.FC<SkuCatalogModuleProps> = ({
                 <th className="py-3 px-4">Código SKU</th>
                 <th className="py-3 px-4">Descripción del Artículo</th>
                 <th className="py-3 px-4">Cliente / Cuenta</th>
-                <th className="py-3 px-4">Categoría / Familia</th>
-                <th className="py-3 px-4 text-center">Clasif. ABC</th>
-                <th className="py-3 px-4 text-center">Dimensiones (L x A x H)</th>
+                <th className="py-3 px-4">Familia</th>
+                <th className="py-3 px-4 text-center">Tipo Control</th>
+                <th className="py-3 px-4 text-center">Dimensiones (L x A x H) m</th>
                 <th className="py-3 px-4 text-right">Peso (kg)</th>
                 <th className="py-3 px-4 text-right">Costo Unitario</th>
                 <th className="py-3 px-4 text-center">Ambiente</th>
@@ -285,23 +285,22 @@ export const SkuCatalogModule: React.FC<SkuCatalogModuleProps> = ({
                         {item.clientName}
                       </td>
                       <td className="py-3 px-4 text-slate-600">
-                        <div>{item.category}</div>
-                        <div className="text-[10px] text-slate-400">{item.family}</div>
+                        {item.family}
                       </td>
                       <td className="py-3 px-4 text-center">
-                        <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-black border ${abcColors[item.abcClass]}`}>
-                          CLASE {item.abcClass}
+                        <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-black border bg-slate-100 text-slate-700 border-slate-200`}>
+                          {item.controlType}
                         </span>
                       </td>
                       <td className="py-3 px-4 text-center font-mono text-slate-600">
-                        {item.dimensionsCm.length} × {item.dimensionsCm.width} × {item.dimensionsCm.height} cm
+                        {item.dimensionsMeters?.length} × {item.dimensionsMeters?.width} × {item.dimensionsMeters?.height} m
                         <div className="text-[10px] text-slate-400 font-normal">({item.volumeM3} m³)</div>
                       </td>
                       <td className="py-3 px-4 text-right font-mono text-slate-700">
                         {item.weightKg} kg
                       </td>
                       <td className="py-3 px-4 text-right font-mono font-bold text-slate-900">
-                        ${item.unitCost.toFixed(2)}
+                        {item.currency} {item.unitCost.toFixed(2)}
                       </td>
                       <td className="py-3 px-4 text-center">
                         <span className={`text-[10px] px-2 py-0.5 rounded font-mono font-medium ${
@@ -396,7 +395,7 @@ export const SkuCatalogModule: React.FC<SkuCatalogModuleProps> = ({
                     onChange={(e) => setFormClientName(e.target.value)}
                     className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold"
                   >
-                    {clients.map(c => (
+                    {(clients || []).map(c => (
                       <option key={c.id} value={c.name}>{c.name}</option>
                     ))}
                   </select>
@@ -417,17 +416,6 @@ export const SkuCatalogModule: React.FC<SkuCatalogModuleProps> = ({
 
               <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">Categoría</label>
-                  <input
-                    type="text"
-                    value={formCategory}
-                    onChange={(e) => setFormCategory(e.target.value)}
-                    className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs"
-                    placeholder="Herramientas"
-                  />
-                </div>
-
-                <div>
                   <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">Familia</label>
                   <input
                     type="text"
@@ -439,15 +427,15 @@ export const SkuCatalogModule: React.FC<SkuCatalogModuleProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">Clasificación ABC</label>
+                  <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">Tipo Control</label>
                   <select
-                    value={formAbcClass}
-                    onChange={(e) => setFormAbcClass(e.target.value as AbcClassification)}
+                    value={formControlType}
+                    onChange={(e) => setFormControlType(e.target.value as ControlType)}
                     className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold"
                   >
-                    <option value="A">Clase A (Alta rotación)</option>
-                    <option value="B">Clase B (Rotación media)</option>
-                    <option value="C">Clase C (Baja rotación)</option>
+                    <option value="GENERAL">General</option>
+                    <option value="LOTE">Lote / Vencimiento</option>
+                    <option value="SERIE">Serie Única</option>
                   </select>
                 </div>
 
@@ -458,42 +446,58 @@ export const SkuCatalogModule: React.FC<SkuCatalogModuleProps> = ({
                     onChange={(e) => setFormUnitOfMeasure(e.target.value as UnitOfMeasure)}
                     className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs"
                   >
-                    <option value="PALLET">Pallet Completo</option>
-                    <option value="CAJA">Caja Master</option>
-                    <option value="UNIDAD">Unidad Suelta</option>
-                    <option value="BIDON">Bidón / Tambor</option>
+                    <option value="PALLET">Pallet</option>
+                    <option value="CAJA">Caja</option>
+                    <option value="UNIDAD">Unidad</option>
+                    <option value="BIDON">Bidón</option>
                   </select>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">Activo</label>
+                  <div className="flex items-center gap-2 pt-2">
+                    <input
+                      type="checkbox"
+                      checked={formActive}
+                      onChange={(e) => setFormActive(e.target.checked)}
+                      className="w-4 h-4 text-emerald-600 focus:ring-emerald-500"
+                    />
+                    <span className="text-xs text-slate-600 font-bold">{formActive ? 'SÍ' : 'NO'}</span>
+                  </div>
                 </div>
               </div>
 
               {/* Dimensions and Weight */}
               <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-2">
-                <span className="text-[11px] font-bold text-slate-800 uppercase block">Dimensiones & Peso Volumétrico</span>
+                <span className="text-[11px] font-bold text-slate-800 uppercase block">Dimensiones (metros) & Peso</span>
                 <div className="grid grid-cols-4 gap-2 text-xs">
                   <div>
-                    <label className="text-[10px] text-slate-400 uppercase font-bold">Largo (cm)</label>
+                    <label className="text-[10px] text-slate-400 uppercase font-bold">Largo (m)</label>
                     <input
                       type="number"
-                      value={formLengthCm}
-                      onChange={(e) => setFormLengthCm(Number(e.target.value))}
+                      step="0.01"
+                      value={formLengthM}
+                      onChange={(e) => setFormLengthM(parseFloat(e.target.value) || 0)}
                       className="w-full p-1.5 bg-white border border-slate-200 rounded font-mono"
                     />
                   </div>
                   <div>
-                    <label className="text-[10px] text-slate-400 uppercase font-bold">Ancho (cm)</label>
+                    <label className="text-[10px] text-slate-400 uppercase font-bold">Ancho (m)</label>
                     <input
                       type="number"
-                      value={formWidthCm}
-                      onChange={(e) => setFormWidthCm(Number(e.target.value))}
+                      step="0.01"
+                      value={formWidthM}
+                      onChange={(e) => setFormWidthM(parseFloat(e.target.value) || 0)}
                       className="w-full p-1.5 bg-white border border-slate-200 rounded font-mono"
                     />
                   </div>
                   <div>
-                    <label className="text-[10px] text-slate-400 uppercase font-bold">Alto (cm)</label>
+                    <label className="text-[10px] text-slate-400 uppercase font-bold">Alto (m)</label>
                     <input
                       type="number"
-                      value={formHeightCm}
-                      onChange={(e) => setFormHeightCm(Number(e.target.value))}
+                      step="0.01"
+                      value={formHeightM}
+                      onChange={(e) => setFormHeightM(parseFloat(e.target.value) || 0)}
                       className="w-full p-1.5 bg-white border border-slate-200 rounded font-mono"
                     />
                   </div>
@@ -512,7 +516,7 @@ export const SkuCatalogModule: React.FC<SkuCatalogModuleProps> = ({
 
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">Costo Unitario ($)</label>
+                  <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">Costo Unitario</label>
                   <input
                     type="number"
                     step="0.01"
@@ -523,13 +527,15 @@ export const SkuCatalogModule: React.FC<SkuCatalogModuleProps> = ({
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">Stock Mínimo</label>
-                  <input
-                    type="number"
-                    value={formMinStock}
-                    onChange={(e) => setFormMinStock(Number(e.target.value))}
-                    className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-mono"
-                  />
+                  <label className="block text-[11px] font-bold text-slate-700 uppercase mb-1">Moneda</label>
+                  <select
+                    value={formCurrency}
+                    onChange={(e) => setFormCurrency(e.target.value as 'PEN' | 'USD')}
+                    className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold"
+                  >
+                    <option value="USD">USD</option>
+                    <option value="PEN">PEN</option>
+                  </select>
                 </div>
 
                 <div>
@@ -540,9 +546,9 @@ export const SkuCatalogModule: React.FC<SkuCatalogModuleProps> = ({
                     className="w-full p-2 bg-slate-50 border border-slate-200 rounded-lg text-xs"
                   >
                     <option value="AMBIENTE">Ambiente Seco</option>
-                    <option value="REFRIGERADO">Cadena de Frío (2°C - 8°C)</option>
-                    <option value="CONGELADO">Congelado (-18°C)</option>
-                    <option value="PELIGROSO">Material Peligroso (HAZMAT)</option>
+                    <option value="REFRIGERADO">Cadena de Frío</option>
+                    <option value="CONGELADO">Congelado</option>
+                    <option value="PELIGROSO">Material Peligroso</option>
                   </select>
                 </div>
               </div>
