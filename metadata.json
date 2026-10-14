@@ -1,0 +1,6 @@
+{
+  "name": "Stadius WMS - Warehouse Management System",
+  "description": "Sistema Integral de Gestión de Almacenes (WMS), Operaciones, Inventarios Cíclicos, Recepción, Almacenamiento, Picking y Despacho.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
